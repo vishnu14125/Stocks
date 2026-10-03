@@ -17,7 +17,7 @@ export const connectDatabase = async (): Promise<void> => {
 
     console.log(`🍃 MongoDB Connected: ${conn.connection.host}`);
 
-     
+    // Handle connection events
     mongoose.connection.on("error", (err) => {
       console.error("🚨 MongoDB connection error:", err);
     });
@@ -26,7 +26,7 @@ export const connectDatabase = async (): Promise<void> => {
       console.log("🔌 MongoDB disconnected");
     });
 
-     
+    // Graceful shutdown
     process.on("SIGINT", async () => {
       await mongoose.connection.close();
       console.log("🛑 MongoDB connection closed through app termination");
@@ -34,21 +34,19 @@ export const connectDatabase = async (): Promise<void> => {
     });
   } catch (error) {
     console.error("🚨 MongoDB connection failed:", error);
-    console.log("💡 To start MongoDB:");
-    console.log("   1. Install MongoDB: https://docs.mongodb.com/manual/installation/");
+    console.log("⚠️  Running in development mode without MongoDB");
+    console.log("💡 To use MongoDB features:");
+    console.log(
+      "   1. Install MongoDB: https://docs.mongodb.com/manual/installation/",
+    );
     console.log("   2. Start MongoDB: mongod");
     console.log("   3. Or use MongoDB Atlas: https://cloud.mongodb.com");
+    console.log("\n✅ App will continue with localStorage functionality");
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log("\n⚠️  Development Mode: Running without database");
-      console.log("🔧 Set up MongoDB Atlas for full functionality:");
-      console.log("   → https://cloud.mongodb.com");
-      console.log("   → Update MONGODB_URI in environment variables");
-      return;
+    // Don't exit in development mode
+    if (process.env.NODE_ENV === "production") {
+      process.exit(1);
     }
-
-    console.log("\n🛑 Application requires MongoDB to function");
-    process.exit(1);
   }
 };
 
@@ -61,19 +59,13 @@ export const disconnectDatabase = async (): Promise<void> => {
   }
 };
 
- 
+// Database health check
 export const checkDatabaseHealth = async (): Promise<boolean> => {
   try {
     const state = mongoose.connection.readyState;
-    if (state === 1) return true; // 1 = connected
-
-    if (process.env.NODE_ENV === 'development') {
-      return true;
-    }
-
-    return false;
+    return state === 1; // 1 = connected
   } catch (error) {
     console.error("🚨 Database health check failed:", error);
-    return process.env.NODE_ENV === 'development';
+    return false;
   }
 };

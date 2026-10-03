@@ -156,11 +156,7 @@ PortfolioSchema.statics.findByUserId = function (userId: string) {
   );
 };
 
-// export const Portfolio = mongoose.model<IPortfolio>(
-//   "Portfolio",
-//   PortfolioSchema,
-// );
-
-export const Portfolio =
-  mongoose.models.Portfolio ||
-  mongoose.model<IPortfolio>("Portfolio", PortfolioSchema);
+export const Portfolio = mongoose.model<IPortfolio>(
+  "Portfolio",
+  PortfolioSchema,
+);
